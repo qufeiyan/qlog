@@ -13,6 +13,7 @@
 /* Include ---------------------------------------------------------------------------------*/
 #include "qlog_def.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {

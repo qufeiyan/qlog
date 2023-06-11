@@ -11,6 +11,9 @@
 #ifndef __QLOG_DEF_H
 #define __QLOG_DEF_H
 /* Include ---------------------------------------------------------------------------------*/
+#include <stddef.h>
+#include <string.h>
+#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,27 +28,30 @@ extern "C" {
 #endif
 
 #ifndef container_of
-#define container_of(ptr, type, member) ({\
-    ((typeof(type) *)((char *)(ptr) - (unsigned long)(&((typeof(type) *)0)->member)))\
-})
+#define container_of(ptr, type, member) \
+    ((typeof(type) *)((char *)(ptr) - (unsigned long)(&((typeof(type) *)0)->member)))
+#endif
 
 
 #undef __inline
-#define __inline __attribute__((always_inline))
+#define __inline inline __attribute__((always_inline))
 
 #undef __weak
 #define __weak __attribute__((weak))
 
 
-enum level{
-    LOG_LEVEL_FATAL,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_WARNING,
-    LOG_LEVEL_DEBUG
-};
+#undef MEMORY_ALIGN_UP
+#define MEMORY_ALIGN_UP(addr, size) ({\
+    (((addr) + (size) - 1) & ~((size) - 1));\
+})
+#undef MEMORY_ALIGN_DOWN 
+#define MEMORY_ALIGN_DOWN(addr, size) ({\
+    ((addr)) & ~((size) - 1);\
+})
 
-typedef enum level level_t;
+#undef MEMORY_ALIGN
+#define MEMORY_ALIGN (sizeof(size_t))
+
 
 
 #ifdef __cplusplus
