@@ -13,11 +13,10 @@ $(warning "gcc: $(CC)")
 $(warning "ar: $(AR)")
 
 CFLAGS += -g -fno-omit-frame-pointer -O0 -fdiagnostics-color=always 
-LFLAGS += -lpthread -ldl -L.
+#LFLAGS += -lpthread -ldl -L.
 IFLAGS += -I./include/
 # DFLAGS += -DUSER_BACKTRACE
 CFLAGS += -funwind-tables 
-# DFLAGS += -DDLC_TEST
 # LSCRIPT += -Tmem.lds
 
 CFLAGS += -fsanitize=address -Wall -Werror
@@ -76,11 +75,11 @@ else
 	$(AR) rcsv $@ $(addprefix ./objs/, $(OBJS)) 
 endif
 
-${TARGET} : demo.c ${LIB} 
-	$(CC) $(LSCRIPT) $^ $(IFLAGS) $(LFLAGS) -l$(LIB_NAME) $(CFLAGS) $(DFLAGS) -o $@
+${TARGET} : demo.c  
+	$(CC) $(LSCRIPT) $^ $(IFLAGS) $(LFLAGS) -L. -l$(LIB_NAME) $(CFLAGS) $(DFLAGS) -o $@
 
-test : test.c libdlChecker.a 
+test : test.c ${LIB}
 	$(CC) $^ $(IFLAGS) $(LFLAGS) -l$(LIB_NAME) $(CFLAGS) $(DFLAGS) -o $@
 
-${UNITTEST} : unitTest.c libdlChecker.a 
+${UNITTEST} : unitTest.c ${LIB}
 	$(CC) $(LSCRIPT) $^ $(IFLAGS) $(LFLAGS) -l$(LIB_NAME) $(CFLAGS) $(DFLAGS) -o $@

@@ -11,6 +11,7 @@
 #include "qlog_api.h"
 #include "mempool.h"
 #include "qlog.h"
+#include "qlog_port.h"
 #include <assert.h>
 #include <stdarg.h>
 

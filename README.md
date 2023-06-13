@@ -1,6 +1,19 @@
-## `Q`uick `log`
+## `Q`uick `log`:适用于嵌入式设备的小巧日志组件
 
-`qlog` 是一个小型的 `c` 语言日志库，能够在资源紧张的嵌入式设备中近乎无损性能地运行。长期以来，笔者接触过的嵌入式项目中都缺少一个功能相对完善的日志模块，甚至多数情况下都是使用原生的打印接口，日志没有条理，直接导致回溯问题时工作效率低下。而嵌入式日志库的实现为了性能必然不能支持太多功能，也无法使用太过复杂的设计，接口实现也要尽量简单。`qlog`正是在这样的背景下应运而生！  
+**English** ｜ [中文](README_ZH.md)  
+
+![license](https://img.shields.io/badge/license-MIT-orange)
+![build](https://img.shields.io/badge/build-passing-brightgreen)
+![prs](https://img.shields.io/badge/PRs-welcome-brightgreen)
+![poweredby](https://img.shields.io/badge/powered%20by-qufeiyan-red)
+
+---
+>`qlog` 是一个小型的 `c` 语言日志库。其设计之初衷是为了能够在资源紧张的嵌入式设备中近乎无损性能地运行。
+
+### 背景 
+自从业以来，笔者参与的嵌入式项目中都缺少一个功能相对完善的日志模块，甚至某些情况下直接使用原生的打印接口，日志没有条理，直接导致回溯问题时工作效率低下。而许多知名第三方库功能虽全，依赖的东西也多，除去移植成本外，在嵌入式设备上运行性能也堪忧。而嵌入式日志库为了保证性能必然不能支持太多功能，也无法使用太过复杂的设计，接口实现也要尽量简单。`qlog`正是在这样的背景下应运而生！  
+
+---
 
 ### 需求
 

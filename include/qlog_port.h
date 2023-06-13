@@ -17,6 +17,7 @@ extern "C" {
 #endif
 
 
+#define COUNT_OF_TAG        (32)    //! maximum number of the filter tag.
 
 
 

@@ -17,12 +17,30 @@
 extern "C" {
 #endif
 
-#define COUNT_OF_TAG        (32)    //! maximum number of the filter tag.
+#define qlog_err(tag, fmt, ...) do{\
+    qlog(tag, LOG_LEVEL_ERROR, "[%s:%d](#%s) "fmt, \
+        __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
+} while(0)
+
+#define qlog_info(tag, fmt, ...) do{\
+    qlog(tag, LOG_LEVEL_INFO, "[%s:%d](#%s) "fmt, \
+        __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
+} while(0)
+
+#define qlog_dbg(tag, fmt, ...) do{\
+    qlog(tag, LOG_LEVEL_DEBUG, "[%s:%d](#%s) "fmt, \
+        __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
+} while(0)
+
+#undef TAG_NAME
+#undef log_err
+#undef log_inf
+#undef log_dbg
+
 
 
 logger_t *qlog_init(level_t level, bool color, bool timestamp, size_t tag_count);
 void qlog(const char *tag, level_t level, const char *format, ...);
-
 void console_puts(const char *str);
 
 
