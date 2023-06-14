@@ -12,7 +12,6 @@
 #include "mempool.h"
 #include "qlog.h"
 #include "qlog_port.h"
-#include <assert.h>
 #include <stdarg.h>
 
 #define SIZE_OF_TAG         sizeof(filter_tag_t)
@@ -51,5 +50,17 @@ void qlog(const char *tag, level_t level, const char *format, ...){
     va_start(args, format);
     logger->run(logger, tag, level, format, args);
     va_end(args);
+}
+
+void qlog_filter(const char *tag, level_t level){
+    assert(logger_unique != NULL);
+    assert(tag != NULL);
+
+    logger_t *logger = logger_unique;
+    filter_t *filter = logger->filter;
+    assert(filter != NULL);
+    assert(filter->append != NULL);
+
+    filter->append(filter, tag, level);
 }
 

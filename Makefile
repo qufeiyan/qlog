@@ -75,8 +75,8 @@ else
 	$(AR) rcsv $@ $(addprefix ./objs/, $(OBJS)) 
 endif
 
-${TARGET} : demo.c  
-	$(CC) $(LSCRIPT) $^ $(IFLAGS) $(LFLAGS) -L. -l$(LIB_NAME) $(CFLAGS) $(DFLAGS) -o $@
+${TARGET} : demo.c $(LIB)
+	$(CC) $(LSCRIPT) demo.c $(IFLAGS) $(LFLAGS) -L. -l$(LIB_NAME) $(CFLAGS) $(DFLAGS) -o $@
 
 test : test.c ${LIB}
 	$(CC) $^ $(IFLAGS) $(LFLAGS) -l$(LIB_NAME) $(CFLAGS) $(DFLAGS) -o $@

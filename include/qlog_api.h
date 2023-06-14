@@ -40,6 +40,7 @@ extern "C" {
 
 
 logger_t *qlog_init(level_t level, bool color, bool timestamp, size_t tag_count);
+void qlog_filter(const char *tag, level_t level);
 void qlog(const char *tag, level_t level, const char *format, ...);
 void console_puts(const char *str);
 

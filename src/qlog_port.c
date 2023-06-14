@@ -23,3 +23,4 @@ __weak void console_puts(const char *str){
     fputs(str, stdout);
 }
 
+

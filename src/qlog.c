@@ -164,7 +164,8 @@ bool _filter_invoke(struct filter *filter, const char *tag, level_t level){
     //! 3. find tag in the filter tag list.
     slist_for_each(current, &filter->list_tag){
         filter_tag = container_of(current, filter_tag_t, list_tag_current);
-        if(strcmp(tag, filter_tag->tag) == 0){
+        if(strcmp(tag, filter_tag->tag) == 0   /*find the tag.*/
+            && filter_tag->level >= level){    
             return false;
         }
     }

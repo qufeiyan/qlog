@@ -13,7 +13,6 @@
 /* Include ---------------------------------------------------------------------------------*/
 #include <stddef.h>
 #include <string.h>
-#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +51,20 @@ extern "C" {
 #undef MEMORY_ALIGN
 #define MEMORY_ALIGN (sizeof(size_t))
 
-
+#if IS_USE_ASSERT
+#undef assert
+#define assert(expression)                            \
+do{                                                   \
+    if(!(expression)){                                \
+        fprintf(stderr, "%s:%d [%s]" #expression      \
+            " is expected...\n", __FILE__, __LINE__, __FUNCTION__);     \
+        abort();                                      \
+    }                                                 \
+}while(0)
+#else
+#undef assert
+#define assert(expression)  (void)(expression)
+#endif
 
 #ifdef __cplusplus
 }

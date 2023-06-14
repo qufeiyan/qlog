@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <string.h>
 
+
 void _fileWriter_write(writer_t *writer){
 
 }
@@ -31,7 +32,7 @@ writer_t *fileWriter(writer_t *writer, const char *name, char *buffer){
     strcpy(writer->name, name);
     writer->buffer = buffer;
     
-
+    
     
     return writer;
 }
