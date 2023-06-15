@@ -20,6 +20,13 @@ extern "C" {
 #define COUNT_OF_TAG        (32)    //! maximum number of the filter tag.
 
 
+/**
+ * @brief   customed console output api.
+ * @param   str is the string to output to console. 
+ * @note    
+ * @see     
+ */
+void console_puts(const char *str);
 
 #ifdef __cplusplus
 }

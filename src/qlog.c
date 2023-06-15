@@ -10,7 +10,7 @@
 /* Includes --------------------------------------------------------------------------------*/
 #include "qlog.h"
 #include "mempool.h"
-#include "qlog_api.h"
+#include "qlog_port.h"
 #include "qlog_def.h"
 #include "qlog_slist.h"
 #include <stdbool.h>
@@ -58,33 +58,33 @@ static const char * const level_info[] = {
     "D/",
 };
 
-
-__weak void _logger_log(logger_t *logger, const char *tag, level_t level, const char *format, va_list args);
-void loggerInit(logger_t *logger, level_t level, formatter_t *formatter, writer_t *writer, filter_t *filter){
-    assert(logger);
-    assert(formatter != NULL);
-    assert(writer != NULL);
-     
-    logger->level = level,
-    memset(&logger->buffer, 0, sizeof(logger->buffer));
-    logger->formatter = formatter;
-    logger->writer = writer;
-    logger->filter = filter;
-
-    logger->formatter->buffer = logger->buffer;
-    logger->writer->buffer = logger->buffer;
-
-    logger->run = _logger_log;
+/**
+ * @brief append a writer to writer list.
+ * @param head is the head of list.
+ * @param target is the writer to be append.
+ */
+static void _writerNext(writer_t *head, writer_t *target){
+    assert(head);
+    writer_t *current = head;
+    while(current->next){
+        current = current->next;
+    }
+    
+    current->next = target;
 }
 
-void loggerDeInit(logger_t *logger){
-    assert(logger);
+/**
+ * @brief  register a writer to logger.
+ *
+ * @param  logger is pointer to logger.   
+ * @param  writer is a new writer to register. 
+ */
+void _registerWriter(logger_t *logger, writer_t *writer){
+    assert(logger != NULL);
+    assert(writer != NULL);
+    assert(logger->writer != NULL);
 
-    memset(&logger->buffer, 0, sizeof(logger->buffer));
-    logger->level = LOG_LEVEL_FATAL;
-    logger->formatter = NULL;
-    logger->writer = NULL;
-    logger->run = NULL;
+    _writerNext(logger->writer, writer);
 }
 
 /**
@@ -93,8 +93,8 @@ void loggerDeInit(logger_t *logger){
  * @param   logger is pointer to the logger.
  * @param   tag is the name of module.
  * @param   level is the level of log.
- * @param   format is the string to ouput.
- * @param   args is the arguments list for format string.
+ * @param   format is the format string to ouput.
+ * @param   args is a list of variable parameters.
  * @note    
  * @see     
  */
@@ -129,7 +129,13 @@ __weak void _logger_log(logger_t *logger, const char *tag, level_t level, const 
     writer->write(writer);
 }
 
-
+/**
+ * @brief   append a tag to filter-tag list.
+ *
+ * @param   filter is pointer to filter.   
+ * @param   tag is pointer to tag which will be append.
+ * @param   level is the level of the tag.
+ */
 void _filter_append(struct filter *filter, const char *tag, level_t level){
     filter_tag_t *filter_tag;
     assert(filter != NULL);
@@ -146,6 +152,15 @@ void _filter_append(struct filter *filter, const char *tag, level_t level){
     slist_append(&filter->list_tag, &filter_tag->list_tag_current);    
 }
 
+/**
+ * @brief   invoke a filter.
+ *
+ * @param   filter is pointer to filter.
+ * @param   tag is the tag of current log.
+ * @param   level is the level of current log.
+ * @return  true means tag will be filtered.    
+ * @see     
+ */
 bool _filter_invoke(struct filter *filter, const char *tag, level_t level){
     slist_t *current;
     filter_tag_t *filter_tag;
@@ -173,19 +188,15 @@ bool _filter_invoke(struct filter *filter, const char *tag, level_t level){
     return true;
 }
 
-
-void filterInit(struct filter *filter, memoryPool_t *mp, char *buffer, level_t level){
-    assert(filter != NULL);
-    assert(level < LOG_LEVEL_BUTT);
-
-    filter->level = level;
-    slist_init(&filter->list_tag);
-    filter->buffer = buffer;
-    filter->append = _filter_append;
-    filter->invoke = _filter_invoke;
-    filter->tagMemoryPool = mp;
-}
-
+/**
+ * @brief   invoke a formatter.
+ *
+ * @param   formatter is pointer to formatter.
+ * @param   tag is tag of current log.
+ * @param   level is level of current log.
+ * @param   format is format string of current log.
+ * @param   args is the arguments list.   
+ */
 void _formatter_invoke(struct formatter *formatter, const char *tag, level_t level, const char *format, va_list args){
     uint32_t length;
     uint32_t colorEndLength = 0;
@@ -260,6 +271,54 @@ void _formatter_invoke(struct formatter *formatter, const char *tag, level_t lev
     formatter->buffer[length] = '\0';
 }
 
+/**
+ * @brief  output a string to console.  
+ *
+ * @param  writer is pointer to writer. 
+ * @note   if another writer exists, it will be excuted sequentially. 
+ * @see     
+ */
+void _consoleWriter_write(struct writer *writer){
+    assert(writer != NULL);
+    assert(writer->buffer != NULL);
+
+    console_puts(writer->buffer);
+
+    writer_t *nextWriter = writer->next;
+    if(nextWriter){
+        nextWriter->write(nextWriter);
+    }
+}
+
+/**
+ * @brief  initialise a filter. 
+ * @param  filter is pointer to filter.
+ * @param  mp is pointer to memory pool, where {@code filter_tag} will be allocated. 
+ * @param  buffer is pointer to the log buffer. 
+ * @param  level is level of the log. 
+ * @see     
+ */
+void filterInit(struct filter *filter, memoryPool_t *mp, char *buffer, level_t level){
+    assert(filter != NULL);
+    assert(level < LOG_LEVEL_BUTT);
+
+    filter->level = level;
+    slist_init(&filter->list_tag);
+    filter->buffer = buffer;
+    filter->append = _filter_append;
+    filter->invoke = _filter_invoke;
+    filter->tagMemoryPool = mp;
+}
+
+/**
+ * @brief   initialise a formatter.   
+ * @param   formatter is pointer to formatter.
+ * @param   color means whether to output log with color.
+ * @param   timestamp means whether to output log with timestamp.
+ * @param   buffer is pointer to log buffer.
+ * @note    
+ * @see     
+ */
 void formatterInit(struct formatter *formatter, bool color, bool timestamp, char *buffer){
     assert(formatter != NULL);
     assert(buffer != NULL);
@@ -267,13 +326,6 @@ void formatterInit(struct formatter *formatter, bool color, bool timestamp, char
     formatter->color = color;
     formatter->timestamp = timestamp;
     formatter->invoke = _formatter_invoke;
-}
-
-void consoleWriter_write(struct writer *writer){
-    assert(writer != NULL);
-    assert(writer->buffer != NULL);
-
-    console_puts(writer->buffer);
 }
 
 /**
@@ -289,21 +341,51 @@ void consoleWriterInit(struct writer *writer, char *buffer){
     strcpy(writer->name, "console");
     writer->buffer = buffer;
     writer->next = NULL;
-    writer->write = consoleWriter_write;
+    writer->write = _consoleWriter_write;
 }
 
-void writerNext(writer_t *head, writer_t *target){
-    assert(head);
-    writer_t *current = head;
-    while(current->next){
-        current = current->next;
-    }
-    
-    current->next = target;
+/**
+ * @brief  initialise a logger.  
+ * @param  logger is pointer to logger.
+ * @param  level is global level of log. 
+ * @param  formatter is pointer to a formatter. 
+ * @param  writer is pointer to a writer.  
+ * @param  filter is pointer to a filter.    
+ * @see     
+ */
+void loggerInit(logger_t *logger, level_t level, formatter_t *formatter, writer_t *writer, filter_t *filter){
+    assert(logger);
+    assert(formatter != NULL);
+    assert(writer != NULL);
+     
+    logger->level = level,
+    memset(&logger->buffer, 0, sizeof(logger->buffer));
+    logger->formatter = formatter;
+    logger->writer = writer;
+    logger->filter = filter;
+
+    logger->formatter->buffer = logger->buffer;
+    logger->writer->buffer = logger->buffer;
+
+    logger->run = _logger_log;
+    logger->registerWriter = _registerWriter;
 }
 
+/**
+ * @brief   deinitialise a logger.
+ * @param   logger is pointer to a logger.
+ * @note    
+ * @see     
+ */
+void loggerDeInit(logger_t *logger){
+    assert(logger);
 
-
+    memset(&logger->buffer, 0, sizeof(logger->buffer));
+    logger->level = LOG_LEVEL_FATAL;
+    logger->formatter = NULL;
+    logger->writer = NULL;
+    logger->run = NULL;
+}
 
 
 

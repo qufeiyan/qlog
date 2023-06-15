@@ -80,10 +80,9 @@ struct logger{
     char buffer[SIZE_OF_LOG_BUFFER];
 
     void (*run)(struct logger *logger, const char *tag, level_t level, const char *fmt, va_list args);
-
+    void (*registerWriter)(struct logger *logger, writer_t *target);
     formatter_t *formatter;
     filter_t *filter;
-
     writer_t *writer;
 };
 
