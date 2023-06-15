@@ -1,6 +1,6 @@
 ## `Q`uick `log`:适用于嵌入式设备的小巧日志组件
 
-**English** ｜ [中文](README_ZH.md)  
+**中文** ｜ [English](README_EN.md)  
 
 ![license](https://img.shields.io/badge/license-MIT-orange)
 ![build](https://img.shields.io/badge/build-passing-brightgreen)
