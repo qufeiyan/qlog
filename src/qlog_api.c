@@ -12,6 +12,7 @@
 #include "mempool.h"
 #include "qlog.h"
 #include "qlog_port.h"
+#include <assert.h>
 #include <stdarg.h>
 
 #define SIZE_OF_TAG         sizeof(filter_tag_t)
@@ -37,15 +38,19 @@ logger_t *qlog_init(level_t level, bool color, bool timestamp, size_t tag_count)
     static writer_t writer;
     static memoryPool_t mp;
     static char tag_pool[SIZE_OF_TAG_POOL];
+    static locker_t locker; 
 
     assert(level < LOG_LEVEL_BUTT);
     assert(tag_count <= SIZE_OF_TAG_BLOCK);
+    
+    //! initialise a locker for logger.
+    lockerInit(&locker, locker_init(NULL));
 
     memoryPoolInit(&mp, "tag_pool", tag_count, sizeof(filter_tag_t), &tag_pool);
     filterInit(&filter, &mp, logger.buffer, level);
     formatterInit(&formatter, color, timestamp, logger.buffer);
     consoleWriterInit(&writer, logger.buffer);
-    loggerInit(&logger, level, &formatter, &writer, &filter);
+    loggerInit(&logger, level, &formatter, &writer, &filter, &locker);
     logger_unique = &logger;
     return &logger;
 }

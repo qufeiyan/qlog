@@ -25,10 +25,10 @@
 #define LOG_COLOR_END        "\x1B[0;m"
 #define LOG_COLOR_RED        "4;91m"
 #define LOG_COLOR_GREEN      "1;92m"
-#define LOG_COLOR_YELLOW     "2;93m"
+#define LOG_COLOR_YELLOW     "3;93m"
 #define LOG_COLOR_BLUE       "0;94m"
 #define LOG_COLOR_MAGENTA    "4;95m"
-#define LOG_COLOR_CYAN       "1;96m"
+#define LOG_COLOR_CYAN       "0;96m"
 
 #define LOG_COLOR_DEBUG      LOG_COLOR_GREEN
 #define LOG_COLOR_INFO       LOG_COLOR_CYAN
@@ -57,6 +57,30 @@ static const char * const level_info[] = {
     "I/",
     "D/",
 };
+
+/**
+ * @brief  provide lock api.
+ * @param  locker is pointer to a locker. 
+ * @note    
+ * @see     
+ */
+void _locker_lock(struct locker *locker){
+    assert(locker != NULL);
+    assert(locker->locker != NULL);
+    locker_lock(locker->locker);
+}
+
+/**
+ * @brief   provide unlock api.
+ * @param   locker is pointer to a locker.
+ * @note    
+ * @see     
+ */
+void _locker_unlock(struct locker *locker){
+    assert(locker != NULL);
+    assert(locker->locker != NULL);
+    locker_unlock(locker->locker);
+}
 
 /**
  * @brief append a writer to writer list.
@@ -102,6 +126,7 @@ __weak void _logger_log(logger_t *logger, const char *tag, level_t level, const 
     filter_t *filter;
     formatter_t *formater;
     writer_t *writer;
+    locker_t *locker;
     assert(logger && format);
     
     //! global filter, if current level > logger.level, there is nothing to output.
@@ -112,6 +137,11 @@ __weak void _logger_log(logger_t *logger, const char *tag, level_t level, const 
     //! filter tag.
     assert(logger->filter != NULL);
     filter = logger->filter;
+
+    assert(logger->locker != NULL);
+    locker = logger->locker;
+    
+    locker->lock(locker);
     if(filter->invoke && filter->invoke(filter, tag, level)){
         return;
     }
@@ -127,6 +157,7 @@ __weak void _logger_log(logger_t *logger, const char *tag, level_t level, const 
     writer = logger->writer;
     assert(writer != NULL);
     writer->write(writer);
+    locker->unlock(locker);
 }
 
 /**
@@ -350,13 +381,16 @@ void consoleWriterInit(struct writer *writer, char *buffer){
  * @param  level is global level of log. 
  * @param  formatter is pointer to a formatter. 
  * @param  writer is pointer to a writer.  
- * @param  filter is pointer to a filter.    
+ * @param  filter is pointer to a filter. 
+ * @param  locker is pointer to a locker.   
  * @see     
  */
-void loggerInit(logger_t *logger, level_t level, formatter_t *formatter, writer_t *writer, filter_t *filter){
+void loggerInit(logger_t *logger, level_t level, 
+    formatter_t *formatter, writer_t *writer, filter_t *filter, locker_t *locker){
     assert(logger);
     assert(formatter != NULL);
     assert(writer != NULL);
+    assert(locker != NULL);
      
     logger->level = level,
     memset(&logger->buffer, 0, sizeof(logger->buffer));
@@ -369,6 +403,8 @@ void loggerInit(logger_t *logger, level_t level, formatter_t *formatter, writer_
 
     logger->run = _logger_log;
     logger->registerWriter = _registerWriter;
+
+    logger->locker = locker;
 }
 
 /**
@@ -387,6 +423,13 @@ void loggerDeInit(logger_t *logger){
     logger->run = NULL;
 }
 
+void lockerInit(struct locker *locker, void *mutex){
+    assert(locker != NULL);
+    assert(mutex != NULL);
 
+    locker->locker = mutex;
+    locker->lock = _locker_lock;
+    locker->unlock = _locker_unlock;
+}
 
 

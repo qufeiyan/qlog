@@ -13,7 +13,7 @@ $(warning "gcc: $(CC)")
 $(warning "ar: $(AR)")
 
 CFLAGS += -g -fno-omit-frame-pointer -O0 -fdiagnostics-color=always 
-#LFLAGS += -lpthread -ldl -L.
+LFLAGS += -lpthread -L.
 IFLAGS += -I./include/
 # DFLAGS += -DUSER_BACKTRACE
 CFLAGS += -funwind-tables 

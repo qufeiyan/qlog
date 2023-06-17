@@ -11,6 +11,7 @@
 #ifndef __QLOG_H
 #define __QLOG_H
 /* Include ---------------------------------------------------------------------------------*/
+#include "qlog_api.h"
 #include "mempool.h"
 #include "qlog_def.h"
 #include "qlog_slist.h"
@@ -22,17 +23,24 @@
 extern "C" {
 #endif
 
-enum level{
-    LOG_LEVEL_FATAL,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_WARNING,
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_BUTT
-};
+// enum level{
+//     LOG_LEVEL_FATAL,
+//     LOG_LEVEL_ERROR,
+//     LOG_LEVEL_INFO,
+//     LOG_LEVEL_WARNING,
+//     LOG_LEVEL_DEBUG,
+//     LOG_LEVEL_BUTT
+// };
 
 typedef enum level level_t;
 
+
+struct locker{
+    void *locker;
+    void (*lock)(struct locker *);
+    void (*unlock)(struct locker *);
+};
+typedef struct locker locker_t;
 
 struct filter_tag{
     char tag[SIZE_OF_NAME];
@@ -84,16 +92,22 @@ struct logger{
     formatter_t *formatter;
     filter_t *filter;
     writer_t *writer;
+
+    locker_t *locker;
 };
 
 typedef struct logger logger_t;
 
-void loggerInit(logger_t *logger, level_t level, formatter_t *formatter, writer_t *writer, filter_t *filter);
+void loggerInit(logger_t *logger, level_t level, 
+                formatter_t *formatter, writer_t *writer, filter_t *filter,
+                locker_t *locker);
 void loggerDeInit(logger_t *logger);
 
 void filterInit(struct filter *filter, memoryPool_t *mp, char *buffer, level_t level);
 void formatterInit(struct formatter *formatter, bool color, bool timestamp, char *buffer);
 void consoleWriterInit(struct writer *writer, char *buffer);
+
+void lockerInit(struct locker *locker, void *mutex);
 
 #ifdef __cplusplus
 }

@@ -19,7 +19,6 @@ extern "C" {
 
 #define COUNT_OF_TAG        (32)    //! maximum number of the filter tag.
 
-
 /**
  * @brief   customed console output api.
  * @param   str is the string to output to console. 
@@ -27,6 +26,11 @@ extern "C" {
  * @see     
  */
 void console_puts(const char *str);
+
+void *locker_init(void *args);
+void locker_lock(void *args);
+void locker_unlock(void *args);
+void locker_deinit(void *args);
 
 #ifdef __cplusplus
 }

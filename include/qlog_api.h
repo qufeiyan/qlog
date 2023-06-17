@@ -12,13 +12,31 @@
 #define __QLOG_API_H
 /* Include ---------------------------------------------------------------------------------*/
 
-#include "qlog.h"
+// #include "qlog.h"
+#include <stdbool.h>
+#include <unistd.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+enum level{
+    LOG_LEVEL_FATAL,
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_WARNING,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_BUTT
+};
+typedef enum level level_t;
+typedef struct logger logger_t;
+
 #define qlog_err(tag, fmt, ...) do{\
     qlog(tag, LOG_LEVEL_ERROR, "[%s:%d](#%s) "fmt, \
+        __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
+} while(0)
+
+#define qlog_warn(tag, fmt, ...) do{\
+    qlog(tag, LOG_LEVEL_WARNING, "[%s:%d](#%s) "fmt, \
         __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
 } while(0)
 
@@ -33,10 +51,23 @@ extern "C" {
 } while(0)
 
 #undef TAG_NAME
-#undef log_err
-#undef log_inf
-#undef log_dbg
+#undef loge
+#undef logi
+#undef logd
+#undef logw
 
+#define loge(fmt, ...) \
+    qlog_err(TAG_NAME, fmt, __VA_ARGS__)
+
+#define logw(fmt, ...) \
+    qlog_warn(TAG_NAME, fmt, __VA_ARGS__)
+
+#define logi(fmt, ...) \
+    qlog_info(TAG_NAME, fmt, __VA_ARGS__)
+
+#define logd(fmt, ...) \
+    qlog_dbg(TAG_NAME, fmt, __VA_ARGS__)
+    
 
 /**
  * @brief   initialise the unique logger.
