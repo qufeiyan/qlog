@@ -35,91 +35,6 @@ In order to ensure performance, the log library must not support too many featur
 Although `qlog` is implemented in 
 `C`, it was designed to use the idea of `oop` to build an abstract model. Therefore, the overall `qlog` or `logger` consists of three abstract interfaces: `filter`, `formatter`, `writter`. In `oop` terms, it satisfies the so-called **dependency injection**, that is, the concrete implementation of the three (low-level) interfaces of `filter`, `formatter`, `writter` is constructed externally and passed to `logger` (high-level) in the form of references, realizing the so-called "rely on abstraction, not concrete implementation" to achieve "loose coupling".
 
-<!-- 
-```plantuml
-@startuml
-abstract class  "Logger"{
-   -level
-   -buffer
-   -filter
-   -formatter
-   -writer
-   +run() 
-}
-abstract class  "Filter"{
-   -tag_list
-   +invok()
-}
-abstract class  "Formatter"{
-   -color
-   -timestamp
-   -buffer
-   +format()
-}
-abstract class  "Writer"{
-   -name
-   -buffer
-   -next
-   +write()
-   +flush()
-}
-class filter{
-   -tag_list
-   +invok()
-}
-Filter <|-- filter
-
-class logger
-{
-   -level
-   -buffer
-   -filter
-   -formatter
-   -writer
-   +run() 
-}
-Logger <|-- logger
-class consoleWriter{
-   -name
-   -buffer
-   -next
-   +write()
-   +flush()
-}
-class fileWriter{
-   -name
-   -buffer
-   -next
-   +write()
-   +flush()
-}
-
-Writer <|-- consoleWriter
-Writer <|-- fileWriter
-
-class formatter{
-   -timestamp
-   -buffer
-   +format()
-}
-
-Formatter <|-- formatter
-
-enum Level{
-  +DEBUG
-  +INFO
-  +ERROR
-  +...
-}
-
-Logger *-- Filter
-Logger *-- Formatter
-Logger *-- Writer
-Logger *.. Level
-Contex ..> Logger
-@enduml
-``` -->
-
 ![logger.uml](./assets/logger.png)
 
 `filter` is responsible for filtering the logs of modules, and its main functions are:
@@ -139,30 +54,6 @@ Contex ..> Logger
 The implementation of `writer` is similar to the "chain of responsibility pattern" in the `23` design patterns. `writer` is an abstract interface, the concrete `writer` is linked to a linked list, A 'writer' is processed and handed over to its successor 'writer', and although the concept is slightly different, if it is represented by a class diagram, the similarity is very high.
 
 ![writer](./assets/writer.png)
-
-<!-- ```plantuml
-@startuml
-abstract class "Writer"{
-   -name
-   -buffer
-   -next
-   +write()
-   +flush()
-}
-class consoleWriter{
-    +write()
-}
-class fileWriter{
-    +write()
-}
-consoleWriter <|-- Writer
-fileWriter <|-- Writer
-Writer o--> Writer
-abstract class Logger
-contex ..> Logger
-Logger *-- Writer
-@enduml
-``` -->
 
 
 ### Features

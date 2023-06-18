@@ -28,84 +28,6 @@
 ### 设计思路
 
 `qlog` 虽然是用 `c` 语言实现，但是设计之初就确定了使用 `oop` 的思想建立抽象模型。因此，整体的 `qlog` 即 `logger` 由 `filter`、`formatter`、`writer` 三个抽象接口组成，硬要往`oop`上靠的话，就是满足所谓的 **依赖注入**，即`filter`、`formatter`、`writer`三个（底层）接口的具体实现由外部构造，以引用的形式传递给 `logger`（高层），实现了所谓的“依赖抽象，而非具体实现”，从而实现 “松耦合”。
-<!-- 
-```plantuml
-@startuml
-abstract class  "Logger"{
-   -level
-   -buffer
-   -filter
-   -formatter
-   -writer
-   +run() 
-}
-abstract class  "Filter"{
-   -tag_list
-   +invok()
-}
-abstract class  "Formatter"{
-   -color
-   -timestamp
-   -buffer
-   +format()
-}
-abstract class  "Writer"{
-   -name
-   -buffer
-   -next
-   +write()
-   +flush()
-}
-class filter{
-   -tag_list
-   +invok()
-}
-Filter <|-- filter
-class logger
-{
-   -level
-   -buffer
-   -filter
-   -formatter
-   -writer
-   +run() 
-}
-Logger <|-- logger
-class consoleWriter{
-   -name
-   -buffer
-   -next
-   +write()
-   +flush()
-}
-class fileWriter{
-   -name
-   -buffer
-   -next
-   +write()
-   +flush()
-}
-Writer <|-- consoleWriter
-Writer <|-- fileWriter
-class formatter{
-   -timestamp
-   -buffer
-   +format()
-}
-Formatter <|-- formatter
-enum Level{
-  +DEBUG
-  +INFO
-  +ERROR
-  +...
-}
-Logger *-- Filter
-Logger *-- Formatter
-Logger *-- Writer
-Logger *.. Level
-Contex ..> Logger
-@enduml
-``` -->
 
 ![logger.uml](./assets/logger.png)
 
@@ -122,31 +44,8 @@ Contex ..> Logger
 - 如果此条日志带有标签，则应加上标签
 
 `writer` 的实现方式整体类似 `23` 种设计模式里的 **责任链模式**，`writer` 是抽象接口，具体的`writer`实现用链表链接，一个`writer`处理完之后交给其后继`writer`处理，尽管概念稍有不同，但如果用类图表示，相似度极高。
-![writer](./assets/writer.png)
 
-<!-- ```plantuml
-@startuml
-abstract class "Writer"{
-   -name
-   -buffer
-   -next
-   +write()
-   +flush()
-}
-class consoleWriter{
-    +write()
-}
-class fileWriter{
-    +write()
-}
-consoleWriter <|-- Writer
-fileWriter <|-- Writer
-Writer o--> Writer
-abstract class Logger
-contex ..> Logger
-Logger *-- Writer
-@enduml
-``` -->
+![writer](./assets/writer.png)
 
 
 ### 已实现或待实现的特性
