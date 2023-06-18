@@ -1,6 +1,9 @@
 #include "qlog_api.h"
 #include <bits/pthreadtypes.h>
 #include <pthread.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 #define TAG_NAME "module"
 
@@ -40,13 +43,17 @@ int main(){
     // qlog_filter("module.err", 4);
     qlog("hello", LOG_LEVEL_INFO, "this is %d\n", sizeof(level_t));
 
+    printf("length : %lu, size %lu %c, %c\n", strlen("\x1B[0;m"), sizeof("\x1B[0;m"), ' ', '\0');
+
+    qlog_registerFileWriter("qlogtest", "./test", 2, 4096);
+    qlog_setFileWriter(true);
+
     pthread_t tid[4];
     size_t i;
     for (i = 0; i < sizeof(tid)/sizeof(tid[0]); i++)
     {   
         pthread_create(&tid[i], NULL, func, (void *)(i+1));
     }
-
 
     qlog_dbg("module.dbg", "this is module %d\n", 333);
     qlog_err("module.err", "this is module %d\n", 333);

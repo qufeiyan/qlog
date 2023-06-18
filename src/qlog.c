@@ -21,21 +21,6 @@
 #include <time.h>
 
 
-#define LOG_COLOR_START      "\x1B["
-#define LOG_COLOR_END        "\x1B[0;m"
-#define LOG_COLOR_RED        "4;91m"
-#define LOG_COLOR_GREEN      "1;92m"
-#define LOG_COLOR_YELLOW     "3;93m"
-#define LOG_COLOR_BLUE       "0;94m"
-#define LOG_COLOR_MAGENTA    "4;95m"
-#define LOG_COLOR_CYAN       "0;96m"
-
-#define LOG_COLOR_DEBUG      LOG_COLOR_GREEN
-#define LOG_COLOR_INFO       LOG_COLOR_CYAN
-#define LOG_COLOR_WARN       LOG_COLOR_YELLOW
-#define LOG_COLOR_ERROR      LOG_COLOR_MAGENTA
-#define LOG_COLOR_FATAL      LOG_COLOR_RED
-
 // #define LOG_CTRL_LEVEL_ERROR (1)
 // #define LOG_CTRL_LEVEL_WARN  (2)
 // #define LOG_CTRL_LEVEL_INFO  (3)
@@ -127,6 +112,7 @@ __weak void _logger_log(logger_t *logger, const char *tag, level_t level, const 
     formatter_t *formater;
     writer_t *writer;
     locker_t *locker;
+    int32_t length;
     assert(logger && format);
     
     //! global filter, if current level > logger.level, there is nothing to output.
@@ -146,16 +132,20 @@ __weak void _logger_log(logger_t *logger, const char *tag, level_t level, const 
         return;
     }
 
+    length = 0;
     //! formater
     assert(logger->formatter != NULL);
     formater = logger->formatter;
     if(formater->invoke){
-        formater->invoke(formater, tag, level, format, args);
+        length = formater->invoke(formater, tag, level, format, args);
     }
     
     //! writer
     writer = logger->writer;
     assert(writer != NULL);
+    writer->length = length;
+    writer->color = formater->color;  //! notes that file writer will filter the color.
+    assert(writer->length > 0 && writer->length < SIZE_OF_LOG_BUFFER); 
     writer->write(writer);
     locker->unlock(locker);
 }
@@ -227,8 +217,9 @@ bool _filter_invoke(struct filter *filter, const char *tag, level_t level){
  * @param   level is level of current log.
  * @param   format is format string of current log.
  * @param   args is the arguments list.   
+ * @return  the length of format string.   
  */
-void _formatter_invoke(struct formatter *formatter, const char *tag, level_t level, const char *format, va_list args){
+int32_t _formatter_invoke(struct formatter *formatter, const char *tag, level_t level, const char *format, va_list args){
     uint32_t length;
     uint32_t colorEndLength = 0;
     assert(formatter != NULL && formatter->buffer != NULL);
@@ -300,6 +291,7 @@ void _formatter_invoke(struct formatter *formatter, const char *tag, level_t lev
     }
 
     formatter->buffer[length] = '\0';
+    return length;
 }
 
 /**
@@ -313,10 +305,14 @@ void _consoleWriter_write(struct writer *writer){
     assert(writer != NULL);
     assert(writer->buffer != NULL);
 
+    if(writer->enable == false) return;
+
     console_puts(writer->buffer);
 
     writer_t *nextWriter = writer->next;
     if(nextWriter){
+        nextWriter->length = writer->length;
+        nextWriter->color = writer->color;  //! used for filtering color info of log buffer.
         nextWriter->write(nextWriter);
     }
 }
@@ -364,7 +360,7 @@ void formatterInit(struct formatter *formatter, bool color, bool timestamp, char
  * @param   writer is pointer to the writer.
  * @param   buffer is pointer to the log buffer.
  */
-void consoleWriterInit(struct writer *writer, char *buffer){
+void consoleWriterInit(struct writer *writer, char *buffer, bool enable){
     assert(writer != NULL);
     assert(buffer != NULL);
 
@@ -373,6 +369,7 @@ void consoleWriterInit(struct writer *writer, char *buffer){
     writer->buffer = buffer;
     writer->next = NULL;
     writer->write = _consoleWriter_write;
+    writer->enable = true;
 }
 
 /**
@@ -423,6 +420,11 @@ void loggerDeInit(logger_t *logger){
     logger->run = NULL;
 }
 
+/**
+ * @brief   initialise a locker.
+ * @param   locker is pointer to a locker.
+ * @param   mutex is pointer to a mutex.     
+ */
 void lockerInit(struct locker *locker, void *mutex){
     assert(locker != NULL);
     assert(mutex != NULL);

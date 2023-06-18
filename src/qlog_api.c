@@ -11,6 +11,7 @@
 #include "qlog_api.h"
 #include "mempool.h"
 #include "qlog.h"
+#include "qlog_fileWriter.h"
 #include "qlog_port.h"
 #include <assert.h>
 #include <stdarg.h>
@@ -49,7 +50,7 @@ logger_t *qlog_init(level_t level, bool color, bool timestamp, size_t tag_count)
     memoryPoolInit(&mp, "tag_pool", tag_count, sizeof(filter_tag_t), &tag_pool);
     filterInit(&filter, &mp, logger.buffer, level);
     formatterInit(&formatter, color, timestamp, logger.buffer);
-    consoleWriterInit(&writer, logger.buffer);
+    consoleWriterInit(&writer, logger.buffer, true);
     loggerInit(&logger, level, &formatter, &writer, &filter, &locker);
     logger_unique = &logger;
     return &logger;
@@ -93,3 +94,73 @@ void qlog_filter(const char *tag, level_t level){
     filter->append(filter, tag, level);
 }
 
+/**
+ * @brief  set console writer enable or disable.
+ * 
+ * @param  enable true is enable, false is disable.  
+ * @note   the console writer is default the first writer.
+ * @see    
+ */
+void qlog_setConsoleWriter(bool enable){
+    logger_t *logger;
+    assert(logger_unique != NULL);
+    logger = logger_unique;
+
+    logger->writer->enable = enable;
+}
+
+/**
+ * @brief  set file writer enable or disable.
+ * 
+ * @param  enable true is enable, false is disable.  
+ * @note   the next writer of console writer is default file writer.
+ * @see    
+ */
+void qlog_setFileWriter(bool enable){
+    logger_t *logger;
+    assert(logger_unique != NULL);
+    logger = logger_unique;
+
+    assert(logger->writer->next != NULL);
+    logger->writer->next->enable = enable;
+}
+
+/**
+ * @brief   register a writer to logger.
+ * @param   writer is the writer to register.
+ * @return  
+ * @note    
+ * @see     
+ */
+void qlog_registerWriter(void *writer){
+    logger_t *logger;
+    assert(logger_unique != NULL);
+    assert(writer != NULL);
+    logger = logger_unique;
+    assert(logger->registerWriter != NULL);
+    logger->registerWriter(logger, writer);
+}
+
+/**
+ * @brief   register file writer to logger.
+ * @param   name is the name of log file.
+ * @param   dir is the directory of log file.
+ * @param   numberOfFiles is the number of log files.
+ * @param   sizeOfFile is size of log file.
+ * @note    
+ * @see     
+ */
+void qlog_registerFileWriter(const char *name, const char *dir, int numberOfFiles, int sizeOfFile){
+    logger_t *logger;
+    writer_t *writer;
+    static fileWriter_t fileWriter;
+    assert(name && dir);
+    assert(numberOfFiles > 0 && sizeOfFile > SIZE_OF_FILE_BUFFER);
+    assert(logger_unique != NULL);
+    logger = logger_unique;
+    writer = (writer_t *)&fileWriter;
+    fileWriterInit(writer, logger->buffer, 
+        name, dir, numberOfFiles, sizeOfFile);
+
+    qlog_registerWriter(writer);
+}

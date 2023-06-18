@@ -181,5 +181,5 @@ Logger *-- Writer
 ### Terms of Use
 As a logging library, `qlog` can be compiled and linked directly into the executable program, or it can be linked at runtime as a dynamic library in embedded devices that support `Linux`.
 
-Please refer to `demo` for details.
+Please refer to `Makefile` && `demo` for details.
 

@@ -18,9 +18,25 @@
 extern "C" {
 #endif
 
+//！ color info.
+#define LOG_COLOR_START      "\x1B["
+#define LOG_COLOR_END        "\x1B[0;m"
+#define LOG_COLOR_RED        "4;91m"
+#define LOG_COLOR_GREEN      "1;92m"
+#define LOG_COLOR_YELLOW     "3;93m"
+#define LOG_COLOR_BLUE       "0;94m"
+#define LOG_COLOR_MAGENTA    "4;95m"
+#define LOG_COLOR_CYAN       "0;96m"
+
+#define LOG_COLOR_DEBUG      LOG_COLOR_GREEN
+#define LOG_COLOR_INFO       LOG_COLOR_CYAN
+#define LOG_COLOR_WARN       LOG_COLOR_YELLOW
+#define LOG_COLOR_ERROR      LOG_COLOR_MAGENTA
+#define LOG_COLOR_FATAL      LOG_COLOR_RED
+
+
 #define SIZE_OF_NAME            (16)
 #define SIZE_OF_PREFIX          (128)
-#define SIZE_OF_LOG_BUFFER      (512)
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -65,6 +81,7 @@ do{                                                   \
 #undef assert
 #define assert(expression)  (void)(expression)
 #endif
+
 
 #ifdef __cplusplus
 }

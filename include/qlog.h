@@ -12,6 +12,7 @@
 #define __QLOG_H
 /* Include ---------------------------------------------------------------------------------*/
 #include "qlog_api.h"
+#include "qlog_port.h"
 #include "mempool.h"
 #include "qlog_def.h"
 #include "qlog_slist.h"
@@ -32,7 +33,7 @@ extern "C" {
 //     LOG_LEVEL_BUTT
 // };
 
-typedef enum level level_t;
+//typedef enum level level_t;
 
 
 struct locker{
@@ -66,13 +67,16 @@ struct formatter{
     bool color;
     char *buffer;  //! pointer to the log buffer.
 
-    void (*invoke)(struct formatter *formatter, const char *tag, level_t level, const char *format, va_list args);
+    int32_t (*invoke)(struct formatter *formatter, const char *tag, level_t level, const char *format, va_list args);
 };
 typedef struct formatter formatter_t;
 
 struct writer{
     char name[SIZE_OF_NAME];
     char *buffer;                   //! pointer to the log buffer.
+    int32_t length;                 //! length of the buffer.
+    bool enable;                    //! whether to enable this writer.
+    bool color;                     //! whether the current log buffer is colored. 
 
     void (*init)(struct writer*);
     void (*deInit)(struct writer*);
@@ -105,9 +109,11 @@ void loggerDeInit(logger_t *logger);
 
 void filterInit(struct filter *filter, memoryPool_t *mp, char *buffer, level_t level);
 void formatterInit(struct formatter *formatter, bool color, bool timestamp, char *buffer);
-void consoleWriterInit(struct writer *writer, char *buffer);
-
+void consoleWriterInit(struct writer *writer, char *buffer, bool enable);
 void lockerInit(struct locker *locker, void *mutex);
+
+void fileWriterInit(writer_t *writer, char *buffer, const char *fileName, const char *directory, 
+                      int numberOfFiles, int sizeOfFile);
 
 #ifdef __cplusplus
 }

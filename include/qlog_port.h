@@ -17,7 +17,15 @@ extern "C" {
 #endif
 
 
-#define COUNT_OF_TAG        (32)    //! maximum number of the filter tag.
+#define COUNT_OF_TAG            (32)    //! maximum number of the filter tag.
+
+#define SIZE_OF_LOG_BUFFER      (512)   //！ size of the log buffer.
+
+#define SIZE_OF_FILE_PATH       (64)    //! maximum size of the file name.
+
+// #define SIZE_OF_FILE_BUFFER     (4096)  //! maximum size of the file buffer.
+
+#define SIZE_OF_FILE_BUFFER     (512)
 
 /**
  * @brief   customed console output api.

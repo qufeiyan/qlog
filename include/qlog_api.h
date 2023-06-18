@@ -97,6 +97,10 @@ void qlog_filter(const char *tag, level_t level);
 void qlog(const char *tag, level_t level, const char *format, ...);
 
 
+void qlog_setConsoleWriter(bool enable);
+void qlog_setFileWriter(bool enable);
+void qlog_registerWriter(void *writer);
+void qlog_registerFileWriter(const char *name, const char *dir, int numberOfFiles, int sizeOfFile);
 
 
 #ifdef __cplusplus
