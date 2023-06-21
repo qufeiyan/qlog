@@ -64,8 +64,26 @@ The implementation of `writer` is similar to the "chain of responsibility patter
 - [x] The log output can be customized and the `writer` needs to be implemented.
 - [ ] Thread-safe and supports asynchronous output. 
 
+### Source code structure
+
+> Platform independent
+
+|source file | description |
+|--|--|
+| mempool.c | A simple memory pool is implemented to request fixed-size memory|
+|qlog_api.c|Simple implementation of upper-level api |
+|qlog_fileWriter.c|Implementation of log file export|
+|qlog_c| The core implementation of `qlog` includes log filters, formatters, default serial output, etc|
+
+> Platform dependent
+
+|source file | description |
+|--|--|
+|qlog_port.c| Platform-dependent code |
+
 ### Terms of Use
 As a logging library, `qlog` can be compiled and linked directly into the executable program, or it can be linked at runtime as a dynamic library in embedded devices that support `Linux`.
+
 
 Please refer to `Makefile` && `demo` for details.
 
