@@ -41,7 +41,7 @@ void *func(void *args){
 int main(){
     qlog_init(LOG_LEVEL_DEBUG, true, true, 5);
     // qlog_filter("module.err", 4);
-    qlog("hello", LOG_LEVEL_INFO, "this is %d\n", sizeof(level_t));
+    qlog("hello", LOG_LEVEL_INFO, "this is %ld\n", sizeof(level_t));
 
     printf("length : %lu, size %lu %c, %c\n", strlen("\x1B[0;m"), sizeof("\x1B[0;m"), ' ', '\0');
 
@@ -54,6 +54,8 @@ int main(){
     {   
         pthread_create(&tid[i], NULL, func, (void *)(i+1));
     }
+
+    loge("hello\n");
 
     qlog_dbg("module.dbg", "this is module %d\n", 333);
     qlog_err("module.err", "this is module %d\n", 333);

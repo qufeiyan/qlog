@@ -31,22 +31,22 @@ typedef enum level level_t;
 typedef struct logger logger_t;
 
 #define qlog_err(tag, fmt, ...) do{\
-    qlog(tag, LOG_LEVEL_ERROR, "[%s:%d](#%s) "fmt, \
+    qlog(tag, LOG_LEVEL_ERROR, "[%s:%d](#%s) " fmt, \
         __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
 } while(0)
 
 #define qlog_warn(tag, fmt, ...) do{\
-    qlog(tag, LOG_LEVEL_WARNING, "[%s:%d](#%s) "fmt, \
+    qlog(tag, LOG_LEVEL_WARNING, "[%s:%d](#%s) " fmt, \
         __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
 } while(0)
 
 #define qlog_info(tag, fmt, ...) do{\
-    qlog(tag, LOG_LEVEL_INFO, "[%s:%d](#%s) "fmt, \
+    qlog(tag, LOG_LEVEL_INFO, "[%s:%d](#%s) " fmt, \
         __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
 } while(0)
 
 #define qlog_dbg(tag, fmt, ...) do{\
-    qlog(tag, LOG_LEVEL_DEBUG, "[%s:%d](#%s) "fmt, \
+    qlog(tag, LOG_LEVEL_DEBUG, "[%s:%d](#%s) " fmt, \
         __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
 } while(0)
 
@@ -57,16 +57,16 @@ typedef struct logger logger_t;
 #undef logw
 
 #define loge(fmt, ...) \
-    qlog_err(TAG_NAME, fmt, __VA_ARGS__)
+    qlog_err(TAG_NAME, fmt, ##__VA_ARGS__)
 
 #define logw(fmt, ...) \
-    qlog_warn(TAG_NAME, fmt, __VA_ARGS__)
+    qlog_warn(TAG_NAME, fmt, ##__VA_ARGS__)
 
 #define logi(fmt, ...) \
-    qlog_info(TAG_NAME, fmt, __VA_ARGS__)
+    qlog_info(TAG_NAME, fmt, ##__VA_ARGS__)
 
 #define logd(fmt, ...) \
-    qlog_dbg(TAG_NAME, fmt, __VA_ARGS__)
+    qlog_dbg(TAG_NAME, fmt, ##__VA_ARGS__)
     
 
 /**
@@ -94,8 +94,7 @@ void qlog_filter(const char *tag, level_t level);
  * @param   level is level of current log.
  * @param   format is format string.  
  */
-void qlog(const char *tag, level_t level, const char *format, ...);
-
+void qlog(const char *tag, level_t level, const char *format, ...) __attribute__((format(printf, 3, 4)));
 
 void qlog_setConsoleWriter(bool enable);
 void qlog_setFileWriter(bool enable);
